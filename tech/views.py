@@ -1,8 +1,8 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, Http404
-from .models import Request, WorkAssignment, Comment
+from .models import Request, WorkAssignment, Comment, Notification
 from .forms import WorkAssignmentForm, RequestForm, UserRequestForm
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
@@ -85,6 +85,13 @@ def request_list(request):
 
 
 @login_required(login_url='login')
+@user_passes_test(is_user, login_url='login')
+def notification_list(request):
+    notifications = Notification.objects.filter(user_profile=request.user.userprofile)
+    return render(request, 'notifications.html', context={'notifications': notifications})
+
+
+@login_required(login_url='login')
 def request_detail(request, pk):
     request_obj = get_object_or_404(Request, pk=pk)
 
@@ -115,6 +122,16 @@ def delete_comment(request, comment_id):
             request.user.userprofile.role == 'admin' or request.user.userprofile == comment.request.client or (
             request.user.userprofile.role == 'ispolnitel' and comment.request.workassignment.assigned_to == request.user.userprofile)):
         comment.delete()
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+
+@login_required(login_url='login')
+def delete_notification(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id)
+
+    if request.user.is_authenticated and request.user.userprofile == notification.user_profile:
+        notification.delete()
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -185,3 +202,23 @@ def create_request(request):
             return redirect('request_list')
 
     return render(request, 'create_request.html', {'form': form})
+
+
+@login_required(login_url='login')
+@user_passes_test(is_admin)
+def statistics(request):
+    # Количество выполненных заявок
+    completed_requests_count = Request.objects.filter(status='completed').count()
+
+    # Среднее время выполнения заявки (в днях)
+    completed_requests = Request.objects.filter(status='completed')
+    total_completion_time = sum((request.date_closed - request.date_added).days for request in completed_requests)
+    avg_completion_time = total_completion_time / completed_requests_count if completed_requests_count > 0 else 0
+
+    # Статистика по типам неисправностей
+    issue_type_statistics = Request.objects.values('issue_type__name').annotate(
+        count=Count('issue_type')).order_by('-count')
+    return render(request, template_name='statistics.html',
+                  context={'completed_requests_count': completed_requests_count,
+                           'avg_completion_time': avg_completion_time,
+                           'issue_type_statistics': issue_type_statistics})

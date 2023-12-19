@@ -108,7 +108,7 @@
         </form>
     {% else %}
         <h2 class="pb-4">Комментарии исполнителя:</h2>
-            {% for comment in comments %}
+        {% for comment in comments %}
             <div class="card text-left mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h6>{{ comment.author.user.username }}</h6>

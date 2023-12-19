@@ -19,12 +19,19 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'request_list' %}">Список заявок</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'statistics' %}">Статистика</a>
+                </li>
             {% elif user.is_authenticated and user.userprofile.role == 'user' %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'create_request' %}">Создать заявку</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'request_list' %}">Мои заявки</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="{% url 'notification_list' %}">Мои уведомления</a>
+
                 </li>
             {% elif user.is_authenticated and user.userprofile.role == 'ispolnitel' %}
                 <li class="nav-item">

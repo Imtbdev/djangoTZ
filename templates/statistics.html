@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Статистика{% endblock %}
+
+{% block content %}
+    <h1 class="text-center pb-4">Статистика</h1>
+    <table class="table table-bordered">
+        <tbody>
+        <tr>
+            <th scope="row">Выполненных заявок</th>
+            <td>{{ completed_requests_count }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Среднее время выполнения заявки</th>
+            <td>{{ avg_completion_time }}</td>
+        </tr>
+        </tbody>
+    </table>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th scope="col">Тип проблемы</th>
+            <th scope="col">Количество</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for issue_type_stat in issue_type_statistics %}
+            <tr>
+                <th scope="row">{{ issue_type_stat.issue_type__name }}</th>
+                <td>{{ issue_type_stat.count }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
