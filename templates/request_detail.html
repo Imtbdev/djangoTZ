@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Информация о заявке{% endblock %}
+
+{% block content %}
+    <h1 class="text-center pb-4">Информация о заявке № {{ request.number }}</h1>
+
+    {% if user.is_authenticated and user.userprofile.role == 'ispolnitel' %}
+        <h3 class="text-center pb-4">Вы ответственны за исполнение этой заявки</h3>
+    {% endif %}
+
+    <table class="table table-bordered">
+        <tbody>
+        <tr>
+            <th scope="row">Номер</th>
+            <td>{{ request.number }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Дата добавления</th>
+            <td>{{ request.date_added }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Оборудование</th>
+            <td>{{ request.equipment.name }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Тип неисправности</th>
+            <td>{{ request.issue_type.name }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Описание</th>
+            <td>{{ request.description }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Клиент</th>
+            <td>{{ request.client.user.username }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Статус</th>
+            <td>{{ request.get_status_display }}</td>
+        </tr>
+        {% if request.status == 'completed' %}
+            <tr>
+                <th scope="row">Дата закрытия</th>
+                <td>{{ request.date_closed }}</td>
+            </tr>
+        {% endif %}
+        </tbody>
+    </table>
+
+    {% if user.is_authenticated and user.userprofile.role == 'admin' %}
+        <div class="d-flex justify-content-between py-4">
+            <a class="btn btn-primary" href="{% url 'edit_request' pk=request.pk %}">Изменить заявку</a>
+            <a class="btn btn-danger" href="{% url 'delete_request' pk=request.pk %}">Удалить заявку</a>
+        </div>
+    {% endif %}
+
+    {% if user.is_authenticated and user.userprofile.role == 'admin' or user.userprofile.role == 'user' %}
+        <h2>Ответственный за исполнение</h2>
+        {% if request.workassignment %}
+            <p>Ответственный: {{ request.workassignment.assigned_to.user.username }}</p>
+            <p>Дата окончания работ: {{ request.workassignment.completion_date }}</p>
+            {% if user.is_authenticated and user.userprofile.role == 'admin' %}
+                <div class="d-flex justify-content-between py-4">
+                    <a class="btn btn-primary" href="{% url 'assign_work' pk=request.pk %}">Изменить назначение</a>
+                    <a class="btn btn-danger" href="{% url 'delete_work_assignment' request_pk=request.pk %}">Удалить
+                        назначение</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="py-4">
+                <p>На эту заявку пока никто не назначен.</p>
+                {% if user.is_authenticated and user.userprofile.role == 'admin' %}
+                    <a class="btn btn-primary" href="{% url 'assign_work' pk=request.pk %}">Назначить</a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+    {% endif %}
+
+    {% if user.is_authenticated and user.userprofile.role == 'ispolnitel' %}
+        <h2 class="pb-4">Ваши комментарии:</h2>
+        {% for comment in comments %}
+            <div class="card text-left mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6>{{ comment.author.user.username }}</h6>
+                    <form method="post" action="{% url 'delete_comment' comment.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ comment.text }}</p>
+                </div>
+                <div class="card-footer text-muted">
+                    Дата: {{ comment.created_at }}
+                </div>
+            </div>
+        {% endfor %}
+        <form method="post" action="{% url 'request_detail' pk=request.pk %}">
+            {% csrf_token %}
+            <div class="form-floating">
+            <textarea class="form-control" name="comment" placeholder="Leave a comment here" id="floatingTextarea2"
+                      style="height: 100px"></textarea>
+                <label for="floatingTextarea2">Введите текст</label>
+            </div>
+            <button type="submit" class="btn btn-primary mt-4">Добавить</button>
+        </form>
+    {% else %}
+        <h2 class="pb-4">Комментарии исполнителя:</h2>
+            {% for comment in comments %}
+            <div class="card text-left mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6>{{ comment.author.user.username }}</h6>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ comment.text }}</p>
+                </div>
+                <div class="card-footer text-muted">
+                    Дата: {{ comment.created_at }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+
+{% endblock %}

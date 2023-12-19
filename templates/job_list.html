@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои заявки{% endblock %}
+
+{% block content %}
+    {% if jobs %}
+        <h1 class="text-center">Список заявок</h1>
+        <div class="list-group text-center">
+            {% for job in jobs %}
+                <a class="h5 list-group-item list-group-item-action" href="{% url 'request_detail' pk=job.request.pk %}">Заявка №{{ job.request.number }}</a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <h1>В данный момент нет активных заявок.</h1>
+    {% endif %}
+{% endblock %}

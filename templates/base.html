@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}TechZ{% endblock %}</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+<body>
+<nav class="navbar bg-body-tertiary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'index' %}">TechZ</a>
+        <ul class="nav nav-pills nav-fill gap-2">
+            {% if user.is_authenticated and user.userprofile.role == 'admin' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'create_request' %}">Создать заявку</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'request_list' %}">Список заявок</a>
+                </li>
+            {% elif user.is_authenticated and user.userprofile.role == 'user' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'create_request' %}">Создать заявку</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'request_list' %}">Мои заявки</a>
+                </li>
+            {% elif user.is_authenticated and user.userprofile.role == 'ispolnitel' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'jobs' %}">Мои заявки</a>
+                </li>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <li class="navbar-text">
+                    Здравствуйте, {{ user.username }}
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-primary" href="{% url 'logout' %}">Выйти</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="btn btn-primary" href="{% url 'login' %}">Вход</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-primary" href="{% url 'register' %}">Регистрация</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+<div class="container" style="max-width: 700px">
+    {% block content %}
+        {% if not user.is_authenticated %}
+            <h3 class="text-center position-absolute top-50 start-50 translate-middle">
+                Для получения доступа к ресурсу необходимо пройти авторизацию либо регистрацию
+            </h3>
+        {% endif %}
+    {% endblock %}
+</div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if request_obj.workassignment %}
+        Изменить назначение
+    {% else %}
+        Назначить
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <h1 class="text-center">
+        {% if request_obj.workassignment %}
+            Изменить назначение
+        {% else %}
+            Назначить
+        {% endif %}
+    </h1>
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" class="btn btn-primary" value="{% if request_obj.workassignment %}Изменить{% else %}Назначить{% endif %}">
+    </form>
+{% endblock %}

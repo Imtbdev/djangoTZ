@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Список заявок{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        {% if requests %}
+            <h1 class="text-center">Список заявок</h1>
+            <form method="GET" action="{% url 'request_list' %}">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Поиск по номеру или параметрам"
+                           name="search_query" value="{{ request.GET.search_query }}">
+                    <button class="btn btn-outline-secondary" type="submit">Поиск</button>
+                </div>
+            </form>
+            <div class="list-group text-center">
+                {% for request in requests %}
+                    <a class="h5 list-group-item list-group-item-action"
+                       href="{% url 'request_detail' pk=request.pk %}">Заявка №{{ request.number }}</a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <h1>В данный момент нет активных заявок.</h1>
+        {% endif %}
+    </div>
+{% endblock %}
