@@ -18,5 +18,6 @@ urlpatterns = [
     path('delete_comment/<int:comment_id>/', views.delete_comment, name='delete_comment'),
     path('delete_notification/<int:notification_id>/', views.delete_notification, name='delete_notification'),
     path('statistics/', views.statistics, name='statistics'),
-    path('requests/<int:pk>/edit_description', views.edit_description, name='edit_description')
+    path('requests/<int:pk>/edit_description', views.edit_description, name='edit_description'),
+    path('requests/<int:pk>/complete', views.complete_request, name='complete_request')
 ]

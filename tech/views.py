@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q, Count
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from .models import Request, WorkAssignment, Comment, Notification
 from .forms import WorkAssignmentForm, RequestForm, UserRequestForm, StyledAuthenticationForm, StyledUserCreationForm, \
     DescriptionForm
@@ -249,3 +249,17 @@ def edit_description(request, pk):
         form.fields['description'].initial = request_obj.description
 
     return render(request, 'edit_description.html', {'form': form, 'request_obj': request_obj})
+
+
+@login_required(login_url='login')
+def complete_request(request, pk):
+    request_obj = get_object_or_404(Request, pk=pk)
+
+    if request.user.userprofile.role == 'admin' or request.user.userprofile.role == 'ispolnitel':
+        if request_obj.status != 'completed':
+            request_obj.status = 'completed'
+            request_obj.save()
+
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+    else:
+        return HttpResponse('Заявка уже завершена')

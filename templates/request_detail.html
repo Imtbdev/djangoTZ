@@ -50,6 +50,9 @@
 
     {% if user.is_authenticated and user.userprofile.role == 'admin' %}
         <div class="d-flex justify-content-between py-4">
+            {% if request.status != 'completed' %}
+                {% include 'confiramtion.html' %}
+            {% endif %}
             <a class="btn btn-primary" href="{% url 'edit_request' pk=request.pk %}">Изменить заявку</a>
             <a class="btn btn-danger" href="{% url 'delete_request' pk=request.pk %}">Удалить заявку</a>
         </div>
@@ -84,9 +87,11 @@
                 {% endif %}
             </div>
         {% endif %}
-
     {% endif %}
     {% if user.is_authenticated and user.userprofile.role == 'ispolnitel' %}
+        {% if request.status != 'completed' %}
+            {% include 'confiramtion.html' %}
+        {% endif %}
         <h2 class="pb-4">Ваши комментарии:</h2>
         {% for comment in comments %}
             <div class="card text-left mb-4">

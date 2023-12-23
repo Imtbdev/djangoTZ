@@ -14,10 +14,12 @@
                 </div>
             </form>
             <div class="list-group text-center">
-                {% for request in requests %}
-                    <a class="h5 list-group-item list-group-item-action"
-                       href="{% url 'request_detail' pk=request.pk %}">Заявка №{{ request.number }}</a>
-                {% endfor %}
+                <ul class="list-group">
+                    {% for request in requests %}
+                        <a class="h5 list-group-item  mt-2"
+                           href="{% url 'request_detail' pk=request.pk %}">Заявка №{{ request.number }}</a>
+                    {% endfor %}
+                </ul>
             </div>
         {% else %}
             <h1 class="text-center">В данный момент нет активных заявок.</h1>
