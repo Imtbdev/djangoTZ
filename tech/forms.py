@@ -116,3 +116,14 @@ class StyledUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'password1', 'password2']
+
+
+class DescriptionForm(forms.ModelForm):
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control'}),
+        label='Описание:'
+    )
+
+    class Meta:
+        model = Request
+        fields = ['description']

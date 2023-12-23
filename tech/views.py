@@ -3,8 +3,8 @@ from django.db.models import Q, Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, Http404
 from .models import Request, WorkAssignment, Comment, Notification
-from .forms import WorkAssignmentForm, RequestForm, UserRequestForm, StyledAuthenticationForm, StyledUserCreationForm
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from .forms import WorkAssignmentForm, RequestForm, UserRequestForm, StyledAuthenticationForm, StyledUserCreationForm, \
+    DescriptionForm
 from django.contrib.auth import login, logout, authenticate
 
 
@@ -186,10 +186,12 @@ def edit_request(request, pk):
     if request.method == 'POST':
         form = RequestForm(request.POST, instance=request_obj)
         if form.is_valid():
+            form.instance.client = form.cleaned_data.get('client')
             form.save()
             return redirect('request_detail', pk=pk)
     else:
         form = RequestForm(instance=request_obj)
+        form.fields['client'].initial = request_obj.client
 
     return render(request, 'edit_request.html', {'form': form, 'request_obj': request_obj})
 
@@ -218,18 +220,32 @@ def create_request(request):
 @login_required(login_url='login')
 @user_passes_test(is_admin)
 def statistics(request):
-    # Количество выполненных заявок
     completed_requests_count = Request.objects.filter(status='completed').count()
 
-    # Среднее время выполнения заявки (в днях)
     completed_requests = Request.objects.filter(status='completed')
     total_completion_time = sum((request.date_closed - request.date_added).days for request in completed_requests)
     avg_completion_time = total_completion_time / completed_requests_count if completed_requests_count > 0 else 0
 
-    # Статистика по типам неисправностей
     issue_type_statistics = Request.objects.values('issue_type__name').annotate(
         count=Count('issue_type')).order_by('-count')
     return render(request, template_name='statistics.html',
                   context={'completed_requests_count': completed_requests_count,
                            'avg_completion_time': avg_completion_time,
                            'issue_type_statistics': issue_type_statistics})
+
+
+@login_required(login_url='login')
+@user_passes_test(is_user_or_admin, login_url='login')
+def edit_description(request, pk):
+    request_obj = get_object_or_404(Request, pk=pk)
+
+    if request.method == 'POST':
+        form = DescriptionForm(request.POST, instance=request_obj)
+        if form.is_valid():
+            form.save()
+            return redirect('request_detail', pk=pk)
+    else:
+        form = DescriptionForm(instance=request_obj)
+        form.fields['description'].initial = request_obj.description
+
+    return render(request, 'edit_description.html', {'form': form, 'request_obj': request_obj})
