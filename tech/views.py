@@ -99,7 +99,8 @@ def request_detail(request, pk):
             request.user.userprofile.role == 'admin' or
             request.user.userprofile == request_obj.client or
             (
-                    request.user.userprofile.role == 'ispolnitel' and request_obj.workassignment.assigned_to == request.user.userprofile)
+                    request.user.userprofile.role == 'ispolnitel' and
+                    request_obj.workassignment.assigned_to == request.user.userprofile)
     ):
         raise Http404("Заявка не найдена")
 
@@ -120,7 +121,8 @@ def delete_comment(request, comment_id):
 
     if request.user.is_authenticated and (
             request.user.userprofile.role == 'admin' or request.user.userprofile == comment.request.client or (
-            request.user.userprofile.role == 'ispolnitel' and comment.request.workassignment.assigned_to == request.user.userprofile)):
+            request.user.userprofile.role == 'ispolnitel' and
+            comment.request.workassignment.assigned_to == request.user.userprofile)):
         comment.delete()
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
