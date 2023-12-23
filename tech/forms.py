@@ -1,7 +1,10 @@
 from django import forms
+from django.contrib.auth.models import User
 from django.forms import DateInput
 from django.utils import timezone
-from .models import UserProfile, WorkAssignment, Request, Equipment, IssueType
+from .models import WorkAssignment, Request, Equipment, IssueType, UserProfile
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.utils.translation import gettext_lazy as _
 
 
 class WorkAssignmentForm(forms.ModelForm):
@@ -48,6 +51,11 @@ class RequestForm(forms.ModelForm):
         label='Статус:',
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+    client = forms.ModelChoiceField(
+        queryset=UserProfile.objects.filter(role='user'),
+        label='Клиент:',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
     class Meta:
         model = Request
@@ -73,3 +81,38 @@ class UserRequestForm(forms.ModelForm):
     class Meta:
         model = Request
         fields = ['equipment', 'issue_type', 'description']
+
+
+class StyledAuthenticationForm(AuthenticationForm):
+    username = forms.CharField(
+        max_length=30,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label='Имя пользователя',
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label='Пароль',
+    )
+
+
+class StyledUserCreationForm(UserCreationForm):
+    username = forms.CharField(
+        max_length=30,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label='Имя пользователя',
+        help_text=_('Обязательное поле. Не более 30 символов.'),
+    )
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label='Пароль',
+        help_text=_('Пароль не может состоять только из цифр и быть слишком простым.'),
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label='Подтвердите пароль',
+        help_text=_("Введите тот же пароль, что и выше, для подтверждения."),
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'password1', 'password2']

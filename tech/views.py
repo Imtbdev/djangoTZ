@@ -3,9 +3,9 @@ from django.db.models import Q, Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, Http404
 from .models import Request, WorkAssignment, Comment, Notification
-from .forms import WorkAssignmentForm, RequestForm, UserRequestForm
+from .forms import WorkAssignmentForm, RequestForm, UserRequestForm, StyledAuthenticationForm, StyledUserCreationForm
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, authenticate
 
 
 def index(request):
@@ -14,25 +14,28 @@ def index(request):
 
 def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = StyledUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             return redirect('index')
     else:
-        form = UserCreationForm()
+        form = StyledUserCreationForm()
     return render(request, 'register.html', {'form': form})
 
 
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = StyledAuthenticationForm(request, request.POST)
         if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('index')
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user:
+                login(request, user)
+                return redirect('index')
     else:
-        form = AuthenticationForm()
+        form = StyledAuthenticationForm()
     return render(request, 'login.html', {'form': form})
 
 
@@ -194,12 +197,18 @@ def edit_request(request, pk):
 @login_required(login_url='login')
 @user_passes_test(is_user_or_admin, login_url='login')
 def create_request(request):
-    form = UserRequestForm(request.POST or None)
+    if request.user.userprofile.role == 'user':
+        form = UserRequestForm(request.POST or None)
+    else:
+        form = RequestForm(request.POST or None)
 
     if request.method == 'POST':
         if form.is_valid():
             request_instance = form.save(commit=False)
-            request_instance.client = request.user.userprofile
+            if is_admin(request.user):
+                request_instance.client = form.cleaned_data.get('client')
+            else:
+                request_instance.client = request.user.userprofile
             request_instance.save()
             return redirect('request_list')
 

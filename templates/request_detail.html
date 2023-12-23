@@ -53,6 +53,10 @@
             <a class="btn btn-primary" href="{% url 'edit_request' pk=request.pk %}">Изменить заявку</a>
             <a class="btn btn-danger" href="{% url 'delete_request' pk=request.pk %}">Удалить заявку</a>
         </div>
+    {% elif user.userprofile.role == 'user' %}
+        <div class="d-flex justify-content-between py-4">
+            <a class="btn btn-primary" href="{% url 'edit_request' pk=request.pk %}">Изменить описание</a>
+        </div>
     {% endif %}
 
     {% if user.is_authenticated and user.userprofile.role == 'admin' or user.userprofile.role == 'user' %}
