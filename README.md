@@ -1,5 +1,10 @@
-
-<style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Readme</title>
+    <style>
         body {
             font-family: 'Arial', sans-serif;
             max-width: 800px;
@@ -21,7 +26,9 @@
 
 <body>
     <h1>Project Readme</h1>
-    <img src='erd.png' width=500px height=500px/>
+    <p align="center">
+        <img src='erd.png' width=500px height=500px/>
+    </p>
     <p>
         This Django application is designed for managing service requests related to equipment. Users can register,
         log in, create, edit, and delete service requests. Different roles (user, ispolnitel, admin) have different
@@ -35,6 +42,7 @@
     <p>
         For more detailed information, refer to the code and comments in the Django project files.
     </p>
+
 </body>
 
 </html>
