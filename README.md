@@ -1,6 +1,6 @@
 
 <body>
-    <h1>Project Readme</h1>
+    <h1>DjangoTZ</h1>
     <p align="center">
         <img src='erd.png' width=500px height=500px/>
     </p>
